@@ -120,12 +120,19 @@ class BaseConverter(object):
                 x = int(x // len(to_digits))
         return res
 
+    def _split_sign(self, number, sign):
+        number = str(number)
+        if not number:
+            raise ValueError('cannot convert an empty string')
+        if number[0] == sign:
+            number = number[1:]
+            if not number:
+                raise ValueError('sign without digits')
+            return number, True
+        return number, False
+
     def encode(self, number):
-        if str(number)[0] == '-':
-            neg = True
-            number = str(number)[1:]
-        else:
-            neg = False
+        number, neg = self._split_sign(number, '-')
 
         value = self._convert(number, self.decimal_digits, self.digits)
         if neg:
@@ -133,11 +140,7 @@ class BaseConverter(object):
         return value
 
     def decode(self, number):
-        if str(number)[0] == self.sign:
-            neg = True
-            number = str(number)[1:]
-        else:
-            neg = False
+        number, neg = self._split_sign(number, self.sign)
 
         value = self._convert(number, self.digits, self.decimal_digits)
         if neg:
