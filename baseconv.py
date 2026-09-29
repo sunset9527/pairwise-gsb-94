@@ -101,6 +101,9 @@ class BaseConverter(object):
         return "%s(%r, sign=%r)" % data
 
     def _convert(self, number, from_digits, to_digits):
+        if str(number) == '':
+            raise ValueError('empty string')
+
         # make an integer out of the number
         x = 0
         for digit in str(number):
@@ -121,26 +124,28 @@ class BaseConverter(object):
         return res
 
     def encode(self, number):
-        if str(number)[0] == '-':
+        number = str(number)
+        if number[:1] == '-':
             neg = True
-            number = str(number)[1:]
+            number = number[1:]
         else:
             neg = False
 
         value = self._convert(number, self.decimal_digits, self.digits)
-        if neg:
+        if neg and value != self.digits[0]:
             return self.sign + value
         return value
 
     def decode(self, number):
-        if str(number)[0] == self.sign:
+        number = str(number)
+        if number[:1] == self.sign:
             neg = True
-            number = str(number)[1:]
+            number = number[1:]
         else:
             neg = False
 
         value = self._convert(number, self.digits, self.decimal_digits)
-        if neg:
+        if neg and value != '0':
             return '-' + value
         return value
 
